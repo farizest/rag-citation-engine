@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Environment secrets
+.env
+
+# Generated data (regenerable from data/raw/ via src/chunker.py)
+data/processed/
+
+# OS/editor cruft
+.DS_Store
+.vscode/
+.idea/
