@@ -1,0 +1,23 @@
+# Office Locations Overview
+
+**Owner:** Finance
+**Last updated:** 2025-08-17
+**Status:** Living document
+
+This is the working reference for office locations overview. If anything here conflicts with what a teammate tells you verbally, this document wins.
+
+## Overview
+
+This is a company-wide reference document maintained centrally.
+
+## Details
+
+Specifics are reviewed periodically to ensure they remain accurate and aligned with current practice.
+
+## Who to contact
+
+Questions about this document should go to the owning team listed above, not to People Team or IT by default.
+
+## Notes
+
+If you believe any part of this document is out of date, flag it to the owning team rather than assuming it's still accurate.

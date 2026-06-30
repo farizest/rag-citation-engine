@@ -7,8 +7,9 @@ venv/
 # Environment secrets
 .env
 
-# Generated data (regenerable from data/raw/ via src/chunker.py)
+# Generated data (regenerable from data/raw/ via src/chunker.py and src/embed.py)
 data/processed/
+data/chroma_db/
 
 # OS/editor cruft
 .DS_Store
