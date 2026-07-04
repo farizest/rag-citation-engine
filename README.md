@@ -18,11 +18,13 @@ system, and why this project demonstrates the difference.]
 [To be filled in once Phase 1 is complete: diagram + explanation of the
 ingestion -> retrieval -> generation pipeline.]
 
+
+
 ## Status
 
 - [x] Phase 1: Corpus, chunking
-- [ ] Phase 1: Embedding, vector store, basic retrieval + generation
-- [ ] Phase 2: Hybrid retrieval, reranking, citation enforcement
+- [x] Phase 1: Embedding, vector store, basic retrieval + generation
+- [x] Phase 2: Hybrid retrieval, reranking, citation enforcement
 - [ ] Phase 3: Golden eval set, CI-gated evaluation
 
 ## Setup
