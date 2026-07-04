@@ -13,15 +13,18 @@ import sys
 from pathlib import Path
 
 from google import genai
+# pyrefly: ignore [missing-import]
 from google.genai import types
 from dotenv import load_dotenv
 
 sys.path.insert(0, str(Path(__file__).parent))
-from retrieve import retrieve
+from retrieve import retrieve, hybrid_search
+from rerank import rerank
 
 load_dotenv()
 
 GEMINI_MODEL = "gemini-2.5-flash"
+CONFIDENCE_THRESHOLD = 0.25
 
 SYSTEM_PROMPT = """You are an internal assistant for Northwind Robotics \
 employees, answering questions using ONLY the wiki excerpts provided below.
@@ -63,8 +66,20 @@ Question: {question}
 Answer the question using only the context above, following the rules \
 in your instructions."""
 
+def check_confidence(chunks: list[dict]) -> bool:
+    if not chunks:
+        return False
+    top_score = chunks[0].get("relevance_score", 0.0)
+    return top_score >= CONFIDENCE_THRESHOLD
 
 def generate_answer(question: str, chunks: list[dict]) -> str:
+    if not check_confidence(chunks):
+        return (
+            "I don't have enough information in the Northwind wiki "
+            "to answer this question confidently. Please check with "
+            "your manager or the relevant team directly."
+        )
+
     client = genai.Client(
         api_key=os.environ["GOOGLE_API_KEY"]
     )
@@ -92,13 +107,18 @@ def main():
     question = sys.argv[1]
     print(f"Question: {question}\n")
 
-    print("Retrieving relevant chunks...")
-    chunks = retrieve(question, k=5)
+    print("Running hybrid search...")
+    candidates = hybrid_search(question, k=10)
 
-    print(f"Retrieved {len(chunks)} chunks:")
+    print("Reranking candidates...")
+    chunks = rerank(question, candidates, top_n=5)
+
+    print(f"Top chunk relevance: {chunks[0]['relevance_score']:.4f}\n")
+
+    print("Retrieved chunks:")
     for chunk in chunks:
         print(f"  - {chunk['metadata']['page_title']} "
-              f"(distance={chunk['distance']:.3f})")
+              f"(relevance={chunk['relevance_score']:.4f})")
 
     print("\nGenerating answer...\n")
     answer = generate_answer(question, chunks)
