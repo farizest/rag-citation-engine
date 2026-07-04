@@ -15,3 +15,7 @@ data/chroma_db/
 .DS_Store
 .vscode/
 .idea/
+
+# Eval reports (change every run, not useful to commit)
+eval/last_report.jsonl
+
