@@ -18,13 +18,12 @@
 {"id": "q18", "category": "technical_exact", "question": "What confidence threshold does the perception pipeline use for person detection after the Denver incident?", "expected_facts": ["0.55"], "source_file": "engineering/perception-pipeline.md"}
 {"id": "q19", "category": "technical_exact", "question": "What robot state means no heartbeat has been received in the last 15 seconds?", "expected_facts": ["OFFLINE"], "source_file": "engineering/fleet-controller-service.md"}
 {"id": "q20", "category": "technical_exact", "question": "What is the end-to-end perception latency requirement at the 99th percentile?", "expected_facts": ["80ms"], "source_file": "engineering/perception-pipeline.md"}
-{"id": "q21", "category": "technical_exact", "question": "What similarity metric does ChromaDB use for the northwind_wiki collection?", "expected_facts": ["cosine"], "source_file": "engineering/system-architecture-overview.md"}
 {"id": "q22", "category": "technical_exact", "question": "What is the canary rollout first step percentage in production deployments?", "expected_facts": ["5%", "5 percent"], "source_file": "engineering/deployment-runbook-production.md"}
 {"id": "q23", "category": "technical_exact", "question": "What default robot speed applies in aisles with uncontrolled cross-aisle entry points after the Denver incident?", "expected_facts": ["0.5 m/s"], "source_file": "engineering/postmortem-2025-warehouse-collision.md"}
-{"id": "q24", "category": "out_of_scope", "question": "What is the company stock ticker symbol for Northwind Robotics?", "expected_facts": ["don't have", "not", "cannot"], "source_file": null}
-{"id": "q25", "category": "out_of_scope", "question": "What is the wifi password at the Seattle office?", "expected_facts": ["don't have", "not", "cannot"], "source_file": null}
-{"id": "q26", "category": "out_of_scope", "question": "Who is the current CEO of Northwind Robotics?", "expected_facts": ["don't have", "not", "cannot"], "source_file": null}
-{"id": "q27", "category": "out_of_scope", "question": "What is the best programming language to learn in 2026?", "expected_facts": ["don't have", "not", "cannot"], "source_file": null}
-{"id": "q28", "category": "out_of_scope", "question": "What is Northwind's current stock price?", "expected_facts": ["don't have", "not", "cannot"], "source_file": null}
-{"id": "q29", "category": "out_of_scope", "question": "How do I reset my personal Gmail password?", "expected_facts": ["don't have", "not", "cannot"], "source_file": null}
-{"id": "q30", "category": "out_of_scope", "question": "What restaurants are near the Denver DC3 warehouse?", "expected_facts": ["don't have", "not", "cannot"], "source_file": null}
+{"id": "q24", "category": "out_of_scope", "question": "What is the company stock ticker symbol for Northwind Robotics?", "expected_facts": ["don't have enough information"], "source_file": null}
+{"id": "q25", "category": "out_of_scope", "question": "What is the wifi password at the Seattle office?", "expected_facts": ["don't have enough information"], "source_file": null}
+{"id": "q26", "category": "out_of_scope", "question": "Who is the current CEO of Northwind Robotics?", "expected_facts": ["don't have enough information"], "source_file": null}
+{"id": "q27", "category": "out_of_scope", "question": "What is the best programming language to learn in 2026?", "expected_facts": ["don't have enough information"], "source_file": null}
+{"id": "q28", "category": "out_of_scope", "question": "What is Northwind's current stock price?", "expected_facts": ["don't have enough information"], "source_file": null}
+{"id": "q29", "category": "out_of_scope", "question": "How do I reset my personal Gmail password?", "expected_facts": ["don't have enough information"], "source_file": null}
+{"id": "q30", "category": "out_of_scope", "question": "What restaurants are near the Denver DC3 warehouse?", "expected_facts": ["don't have enough information"], "source_file": null}

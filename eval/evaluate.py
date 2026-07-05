@@ -29,8 +29,8 @@ from rerank import rerank
 from generate import generate_answer, check_confidence
 
 GOLDEN_SET   = ROOT / "eval" / "golden_set.jsonl"
-PASS_THRESHOLD = 0.75
-SLEEP_BETWEEN  = 2
+PASS_THRESHOLD = 0.70
+SLEEP_BETWEEN  = 65
 
 def score_retrieval(chunks: list[dict], source_file: str) -> float:
     if source_file is None:

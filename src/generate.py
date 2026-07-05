@@ -23,7 +23,7 @@ from rerank import rerank
 
 load_dotenv()
 
-GEMINI_MODEL = "gemini-2.5-flash"
+GEMINI_MODEL = "gemini-2.0-flash"
 CONFIDENCE_THRESHOLD = 0.25
 
 SYSTEM_PROMPT = """You are an internal assistant for Northwind Robotics \
