@@ -1,8 +1,9 @@
 """
 Generation pipeline for the Northwind Robotics wiki corpus.
 
-Takes a user question, retrieves relevant chunks, and asks Gemini to
-answer using ONLY that retrieved context -- with citations back to the
+Takes a user question, retrieves relevant chunks via hybrid search,
+reranks them with Cohere, and asks Groq (Llama 3.3 70B) to answer
+using ONLY that retrieved context -- with citations back to the
 source file for every claim.
 
 Run directly to test end-to-end retrieval + generation:
@@ -12,18 +13,17 @@ import os
 import sys
 from pathlib import Path
 
-from google import genai
 # pyrefly: ignore [missing-import]
-from google.genai import types
+from openai import OpenAI
 from dotenv import load_dotenv
 
 sys.path.insert(0, str(Path(__file__).parent))
-from retrieve import retrieve, hybrid_search
+from retrieve import hybrid_search
 from rerank import rerank
 
 load_dotenv()
 
-GEMINI_MODEL = "gemini-2.0-flash"
+GROQ_MODEL           = "llama-3.3-70b-versatile"
 CONFIDENCE_THRESHOLD = 0.25
 
 SYSTEM_PROMPT = """You are an internal assistant for Northwind Robotics \
@@ -50,7 +50,6 @@ def format_context(chunks: list[dict]) -> str:
             f"{chunk['text']}"
         )
         blocks.append(block)
-
     return "\n\n---\n\n".join(blocks)
 
 
@@ -66,11 +65,13 @@ Question: {question}
 Answer the question using only the context above, following the rules \
 in your instructions."""
 
+
 def check_confidence(chunks: list[dict]) -> bool:
     if not chunks:
         return False
     top_score = chunks[0].get("relevance_score", 0.0)
     return top_score >= CONFIDENCE_THRESHOLD
+
 
 def generate_answer(question: str, chunks: list[dict]) -> str:
     if not check_confidence(chunks):
@@ -80,23 +81,24 @@ def generate_answer(question: str, chunks: list[dict]) -> str:
             "your manager or the relevant team directly."
         )
 
-    client = genai.Client(
-        api_key=os.environ["GOOGLE_API_KEY"]
+    client = OpenAI(
+        api_key=os.environ["GROQ_API_KEY"],
+        base_url="https://api.groq.com/openai/v1",
     )
 
     context = format_context(chunks)
-    prompt = build_prompt(question, context)
+    prompt  = build_prompt(question, context)
 
-    response = client.models.generate_content(
-        model=GEMINI_MODEL,
-        contents=prompt,
-        config=types.GenerateContentConfig(
-            system_instruction=SYSTEM_PROMPT,
-            max_output_tokens=1024,
-        ),
+    response = client.chat.completions.create(
+        model=GROQ_MODEL,
+        messages=[
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user",   "content": prompt},
+        ],
+        max_tokens=1024,
     )
 
-    return response.text
+    return response.choices[0].message.content
 
 
 def main():
