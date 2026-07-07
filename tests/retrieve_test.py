@@ -12,6 +12,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
+# pyrefly: ignore [missing-import]
 from retrieve import retrieve, load_collection
 
 
@@ -48,7 +49,6 @@ def test_results_are_sorted_by_distance():
         "results should be sorted by ascending distance (closest first)"
 
     print("PASS: results are correctly sorted by distance\n")
-
 
 if __name__ == "__main__":
     test_collection_is_populated()

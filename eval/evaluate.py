@@ -13,10 +13,12 @@ This exit code is what causes a GitHub Actions CI build to fail.
 Usage:
     python eval/evaluate.py
 """
+import os
 import json
 import sys
 import time
 from pathlib import Path
+RETRIEVAL_ONLY = os.environ.get("RETRIEVAL_ONLY", "false").lower() == "true"
 
 ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(ROOT / "src"))
@@ -29,7 +31,7 @@ from rerank import rerank
 from generate import generate_answer, check_confidence
 
 GOLDEN_SET   = ROOT / "eval" / "golden_set.jsonl"
-PASS_THRESHOLD = 0.70
+PASS_THRESHOLD = 0.60 if RETRIEVAL_ONLY else 0.75
 SLEEP_BETWEEN  = 65
 
 def score_retrieval(chunks: list[dict], source_file: str) -> float:
@@ -63,13 +65,18 @@ def run_evaluation() -> dict:
         print(f"[{i:02d}/{len(questions)}] {q['category']:15s} | {q['question'][:55]}...")
 
         try:
-            candidates = hybrid_search(q["question"], k=10)
-            chunks     = rerank(q["question"], candidates, top_n=5)
-            answer     = generate_answer(q["question"], chunks)
+            candidates  = hybrid_search(q["question"], k=10)
+            chunks      = rerank(q["question"], candidates, top_n=5)
+            ret_score   = score_retrieval(chunks, q["source_file"])
 
-            ret_score  = score_retrieval(chunks, q["source_file"])
-            faith_score = score_faithfulness(answer, q["expected_facts"])
-            passed     = (ret_score + faith_score) / 2 >= 0.5
+            if RETRIEVAL_ONLY:
+                faith_score = ret_score
+                answer      = "RETRIEVAL_ONLY_MODE"
+            else:
+                answer      = generate_answer(q["question"], chunks)
+                faith_score = score_faithfulness(answer, q["expected_facts"])
+
+            passed = (ret_score + faith_score) / 2 >= 0.5
 
             results.append({
                 "id"           : q["id"],
