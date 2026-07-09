@@ -18,6 +18,7 @@ import chromadb
 from sentence_transformers import SentenceTransformer
 # pyrefly: ignore [missing-import]
 from rank_bm25 import BM25Okapi
+from concurrent.futures import ThreadPoolExecutor
 
 ROOT = Path(__file__).parent.parent
 CHROMA_DIR = ROOT / "data" / "chroma_db"
@@ -25,10 +26,16 @@ TOP_K = 5
 COLLECTION_NAME = "northwind_wiki"
 EMBED_MODEL = "all-MiniLM-L6-v2"
 
+# At module level — loaded ONCE when the module is imported
+_model = SentenceTransformer("all-MiniLM-L6-v2")
+_collection = None
+
 def load_collection():
-    chroma_client = chromadb.PersistentClient(path=str(CHROMA_DIR))
-    collection = chroma_client.get_collection(name = COLLECTION_NAME)
-    return collection
+    global _collection
+    if _collection is None:
+        chroma_client = chromadb.PersistentClient(path=str(CHROMA_DIR))
+        _collection = chroma_client.get_collection(name=COLLECTION_NAME)
+    return _collection
 
 def retrieve(query:str, k:int = TOP_K)->list[dict]:
     model = SentenceTransformer(EMBED_MODEL)
@@ -93,8 +100,11 @@ def bm25_search(query: str, k: int = TOP_K) -> list[dict]:
 
     return results
 def hybrid_search(query:str,k:int=TOP_K,fetch_k:int=10)->list[dict]:
-    vector_results = retrieve(query,k=fetch_k)
-    bm25_results = bm25_search(query,k=fetch_k)
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        vector_future = executor.submit(retrieve, query, fetch_k)
+        bm25_future   = executor.submit(bm25_search, query, fetch_k)
+        vector_results = vector_future.result()
+        bm25_results   = bm25_future.result()
     #build rank lookup tables
     vector_ranks = {
         r["chunk_id"]:rank for rank , r in enumerate(vector_results,start=1)
