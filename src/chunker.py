@@ -179,7 +179,7 @@ def chunk_file(filepath: Path):
             chunks.append(Chunk(
                 chunk_id=chunk_id,
                 text=contextualized,
-                source_file=str(filepath.relative_to(RAW)),
+                source_file=str(filepath.relative_to(RAW)) if filepath.is_relative_to(RAW) else filepath.name,
                 department=department,
                 page_title=title,
                 section_heading=display_heading,
