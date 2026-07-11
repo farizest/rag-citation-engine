@@ -17,6 +17,30 @@ import json
 import re
 from dataclasses import dataclass, asdict
 from pathlib import Path
+# pyrefly: ignore [missing-import]
+import json
+import re
+from dataclasses import dataclass, asdict
+from pathlib import Path
+import fitz  # PyMuPDF
+import nltk
+# ── Dynamic model downloading ─────────────────────────────────
+# This ensures that NLTK's sentence tokenization models are
+# available on whatever machine runs this project.
+try:
+    nltk.data.find('tokenizers/punkt')
+except Exception:
+    nltk.download('punkt', quiet=True)
+
+try:
+    nltk.data.find('tokenizers/punkt_tab')
+except Exception:
+    try:
+        nltk.download('punkt_tab', quiet=True)
+    except Exception:
+        pass  # punkt_tab is not needed or supported in older NLTK versions
+
+
 
 ROOT = Path(__file__).parent.parent
 RAW = ROOT / "data" / "raw"
@@ -30,6 +54,27 @@ WORDS_TO_TOKENS = 1.3
 
 def count_tokens(text: str) -> int:
     return int(len(text.split()) * WORDS_TO_TOKENS)
+
+def extract_pdf_text(filepath: Path) -> str:
+    """
+    Extract text page-by-page from a PDF file using PyMuPDF.
+    Formats pages with a header prefix so the chunker treats each page
+    as an individual structural section.
+    """
+    doc = fitz.open(str(filepath))
+    pages = []
+    for i, page in enumerate(doc, start=1):
+        text = page.get_text()
+        if text.strip():
+            pages.append(f"## Page {i}\n\n{text.strip()}")
+    return "\n\n".join(pages)
+
+
+def split_into_sentences(text: str) -> list[str]:
+    """
+    Splits dense text into full grammatical sentences using NLTK.
+    """
+    return nltk.sent_tokenize(text)
 
 
 @dataclass
@@ -78,36 +123,46 @@ def split_into_sections(body: str):
 
 
 def split_long_section(text: str, max_tokens: int, overlap_tokens: int):
-    paragraphs = [p.strip() for p in re.split(r"\n\s*\n", text) if p.strip()]
-    if not paragraphs:
+    """
+    Splits a long section into chunks using grammatical sentence boundaries.
+    Applies sliding-window overlap using sentence groups.
+    """
+    sentences = split_into_sentences(text)
+    if not sentences:
         return [text]
 
     sub_chunks = []
-    current_paras = []
+    current_sents = []
     current_tokens = 0
 
-    for para in paragraphs:
-        para_tokens = count_tokens(para)
-        if current_tokens + para_tokens > max_tokens and current_paras:
-            sub_chunks.append("\n\n".join(current_paras))
-            overlap_paras = []
+    for sent in sentences:
+        sent_tokens = count_tokens(sent)
+        
+        # If adding this sentence exceeds the token limit, save the chunk
+        if current_tokens + sent_tokens > max_tokens and current_sents:
+            sub_chunks.append(" ".join(current_sents))
+            
+            # ── sliding window overlap ────────────────────────────────
+            # Backtrack and include previous sentences up to overlap_tokens
+            overlap_sents = []
             overlap_count = 0
-            for p in reversed(current_paras):
-                pt = count_tokens(p)
-                if overlap_count + pt > overlap_tokens:
+            for s in reversed(current_sents):
+                st = count_tokens(s)
+                if overlap_count + st > overlap_tokens:
                     break
-                overlap_paras.insert(0, p)
-                overlap_count += pt
-            current_paras = overlap_paras
+                overlap_sents.insert(0, s)
+                overlap_count += st
+            current_sents = overlap_sents
             current_tokens = overlap_count
 
-        current_paras.append(para)
-        current_tokens += para_tokens
+        current_sents.append(sent)
+        current_tokens += sent_tokens
 
-    if current_paras:
-        sub_chunks.append("\n\n".join(current_paras))
+    if current_sents:
+        sub_chunks.append(" ".join(current_sents))
 
     return sub_chunks
+
 
 
 def merge_small_sections(sections, target_tokens: int, max_tokens: int):
@@ -141,10 +196,26 @@ def merge_small_sections(sections, target_tokens: int, max_tokens: int):
     flush()
     return merged
 
+def chunk_file(filepath: Path, override_title: str = None):
+    """
+    Reads a file (supporting PDF, MD, TXT), handles frontmatter or titles,
+    splits it into sections, and yields contextualized Chunk objects.
+    """
+    # ── 1. Select the extraction method ───────────────────────────
+    if filepath.suffix.lower() == ".pdf":
+        raw = extract_pdf_text(filepath)
+    else:
+        # Using utf-8 with errors='ignore' ensures we don't crash on odd characters
+        raw = filepath.read_text(encoding="utf-8", errors="ignore")
 
-def chunk_file(filepath: Path):
-    raw = filepath.read_text()
     title, body = parse_frontmatter(raw)
+    if override_title:
+        title = override_title
+    
+    # ── 2. Fall back to filename stem if there is no header ───────
+    if not title:
+        title = override_title or filepath.stem
+
     department = filepath.parent.name
     raw_sections = split_into_sections(body)
     sections = merge_small_sections(raw_sections, TARGET_TOKENS, MAX_TOKENS)
@@ -159,27 +230,33 @@ def chunk_file(filepath: Path):
 
         display_heading = (
             "Full page"
-            if len(raw_sections) > 1
-            and len(sections) == 1
+            if len(raw_sections) > 1 and len(sections) == 1
             else heading
         )
 
         for idx, piece in enumerate(pieces):
+            # Form contextualized chunk by prepending Title/Heading details
             if display_heading == "Full page":
                 contextualized = f"# {title}\n\n{piece}"
             else:
                 contextualized = f"# {title}\n## {heading}\n\n{piece}"
 
             chunk_id = (
-                f"{filepath.stem}"
+                f"{filepath.name}"
                 f"::{display_heading.lower().replace(' ', '-').replace('/', '-')[:60]}"
                 f"::{idx}"
             )
 
+            # Safely determine relative paths
+            try:
+                source_file = str(filepath.relative_to(RAW))
+            except ValueError:
+                source_file = filepath.name
+
             chunks.append(Chunk(
                 chunk_id=chunk_id,
                 text=contextualized,
-                source_file=str(filepath.relative_to(RAW)) if filepath.is_relative_to(RAW) else filepath.name,
+                source_file=source_file,
                 department=department,
                 page_title=title,
                 section_heading=display_heading,
