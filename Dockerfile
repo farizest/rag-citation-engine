@@ -7,8 +7,9 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt && \
-    python -c "import nltk; nltk.download('punkt'); nltk.download('punkt_tab')"
+RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir nltk==3.8.1
+RUN python -c "import nltk; nltk.download('punkt'); nltk.download('punkt_tab')"
 
 COPY src/ ./src/
 COPY app/ ./app/
