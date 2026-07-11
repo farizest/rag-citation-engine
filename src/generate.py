@@ -26,18 +26,18 @@ load_dotenv()
 GROQ_MODEL           = "llama-3.3-70b-versatile"
 CONFIDENCE_THRESHOLD = 0.25
 
-SYSTEM_PROMPT = """You are an internal assistant for Northwind Robotics \
-employees, answering questions using ONLY the wiki excerpts provided below.
+SYSTEM_PROMPT = """You are a helpful document assistant that answers \
+questions using ONLY the provided document excerpts.
 
 Rules:
-1. Answer using ONLY information found in the provided context. Do not \
-use any outside knowledge, even if you think you know the answer.
+1. Answer using ONLY information found in the provided context. Do \
+not use any outside knowledge, even if you think you know the answer.
 2. Every claim in your answer must be followed by a citation in the \
 format [Source: <page title>].
-3. If the provided context does not contain enough information to \
-answer the question, say so explicitly. Do not guess or make up an \
-answer.
-4. Be concise and direct. Do not repeat the question back."""
+3. If the context does not contain enough information to answer the \
+question, say so explicitly. Never guess or fabricate an answer.
+4. Be concise, clear, and direct. Do not repeat the question back.
+5. If multiple sources support the answer, cite all of them."""
 
 
 def format_context(chunks: list[dict]) -> str:
@@ -54,7 +54,7 @@ def format_context(chunks: list[dict]) -> str:
 
 
 def build_prompt(question: str, context: str) -> str:
-    return f"""Context (wiki excerpts):
+    return f"""Document excerpts:
 
 {context}
 
@@ -62,8 +62,7 @@ def build_prompt(question: str, context: str) -> str:
 
 Question: {question}
 
-Answer the question using only the context above, following the rules \
-in your instructions."""
+Answer using only the excerpts above. Cite every claim."""
 
 
 def check_confidence(chunks: list[dict]) -> bool:
@@ -76,11 +75,10 @@ def check_confidence(chunks: list[dict]) -> bool:
 def generate_answer(question: str, chunks: list[dict]) -> str:
     if not check_confidence(chunks):
         return (
-            "I don't have enough information in the Northwind wiki "
-            "to answer this question confidently. Please check with "
-            "your manager or the relevant team directly."
+            "I don't have enough information in the uploaded documents "
+            "to answer this question confidently. Please upload a relevant "
+            "document or rephrase your question."
         )
-
     client = OpenAI(
         api_key=os.environ["GROQ_API_KEY"],
         base_url="https://api.groq.com/openai/v1",
