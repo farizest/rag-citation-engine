@@ -21,6 +21,8 @@ RUN pip install --no-cache-dir \
     nltk==3.8.1 \
     python-docx==1.1.2
 
+RUN pip show nltk
+
 RUN python -c "import nltk; nltk.download('punkt'); nltk.download('punkt_tab')"
 
 COPY src/ ./src/
