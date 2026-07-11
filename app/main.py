@@ -107,8 +107,10 @@ async def upload_document(file: UploadFile = File(...)):
         tmp_path = Path(tmp.name)
 
     try:
-        # ── chunk the document ────────────────────────────────
-        chunks = chunk_file(tmp_path)
+                # ── chunk the document ────────────────────────────────
+        # Pass the original user-uploaded filename (without extension) as the override title
+        chunks = chunk_file(tmp_path, override_title=Path(file.filename).stem)
+
 
         if not chunks:
             raise HTTPException(
@@ -237,6 +239,6 @@ if __name__ == "__main__":
     uvicorn.run(
         "main:app",
         host="0.0.0.0",
-        port=8000,
-        reload=True,
+        port=7860,
+        reload=False,
     )

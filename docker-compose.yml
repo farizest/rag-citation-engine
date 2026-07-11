@@ -1,0 +1,15 @@
+version: "3.9"
+
+services:
+  app:
+    build: .
+    ports:
+      - "8000:7860"
+    environment:
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - COHERE_API_KEY=${COHERE_API_KEY}
+    volumes:
+      - chroma_data:/app/data/user_chroma_db
+
+volumes:
+  chroma_data:
