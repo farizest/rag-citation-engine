@@ -19,3 +19,12 @@ data/chroma_db/
 # Eval reports (change every run, not useful to commit)
 eval/last_report.jsonl
 
+# Gradio cache
+.gradio/
+
+# User uploaded document vector store
+data/user_chroma_db/
+
+# Prototype files superseded by app/main.py
+src/api.py
+src/app.py

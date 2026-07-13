@@ -25,7 +25,7 @@ CHUNKS_FILE     = ROOT / "data" / "processed" / "chunks.jsonl"
 CHROMA_DIR      = ROOT / "data" / "chroma_db"
 
 COLLECTION_NAME = "northwind_wiki"
-EMBED_MODEL     = "all-MiniLM-L6-v2"
+EMBED_MODEL     = "paraphrase-MiniLM-L3-v2"
 BATCH_SIZE      = 32
 
 
