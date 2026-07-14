@@ -28,3 +28,4 @@ data/user_chroma_db/
 # Prototype files superseded by app/main.py
 src/api.py
 src/app.py
+eval/ragas_report.json

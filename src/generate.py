@@ -12,6 +12,7 @@ Run directly to test end-to-end retrieval + generation:
 import os
 import sys
 from pathlib import Path
+from google import genai
 
 # pyrefly: ignore [missing-import]
 from openai import OpenAI
@@ -23,7 +24,7 @@ from rerank import rerank
 
 load_dotenv()
 
-GROQ_MODEL           = "llama-3.3-70b-versatile"
+GEMINI_MODEL           = "gemini-2.5-flash"
 CONFIDENCE_THRESHOLD = 0.25
 
 SYSTEM_PROMPT = """You are a helpful document assistant that answers \
@@ -79,24 +80,19 @@ def generate_answer(question: str, chunks: list[dict]) -> str:
             "to answer this question confidently. Please upload a relevant "
             "document or rephrase your question."
         )
-    client = OpenAI(
-        api_key=os.environ["GROQ_API_KEY"],
-        base_url="https://api.groq.com/openai/v1",
-    )
+    client = genai.Client(
+    api_key=os.environ["GOOGLE_API_KEY"]
+)
 
     context = format_context(chunks)
     prompt  = build_prompt(question, context)
 
-    response = client.chat.completions.create(
-        model=GROQ_MODEL,
-        messages=[
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user",   "content": prompt},
-        ],
-        max_tokens=1024,
-    )
+    response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=f"{SYSTEM_PROMPT}\n\n{prompt}",
+        )
 
-    return response.choices[0].message.content
+    return response.text
 
 
 def main():
