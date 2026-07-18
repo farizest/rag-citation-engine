@@ -1,373 +1,1265 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RAG Citation Engine</title>
+<title>Zyricon RAG — Citation Engine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --bg-main: #0b080f;
+    --bg-gradient: radial-gradient(circle at 50% 25%, #180d28 0%, #0b080f 75%);
+    --bg-sidebar: #060408;
+    --border-color: rgba(168, 85, 247, 0.16);
+    --border-muted: rgba(255, 255, 255, 0.05);
+    --text-primary: #f1edf7;
+    --text-secondary: #a89eb9;
+    --text-muted: #675c78;
+    --accent-purple: #a855f7;
+    --accent-glow: rgba(168, 85, 247, 0.35);
+    --glass-bg: rgba(18, 14, 24, 0.65);
+    --glass-border: rgba(168, 85, 247, 0.18);
+    --card-bg: #110e17;
+    --input-bg: rgba(22, 17, 30, 0.8);
+    --button-hover: rgba(168, 85, 247, 0.12);
+    --bubble-user: rgba(168, 85, 247, 0.15);
+    --bubble-user-border: rgba(168, 85, 247, 0.3);
+    --bubble-bot: rgba(18, 14, 24, 0.7);
+    --bubble-bot-border: rgba(168, 85, 247, 0.1);
+    --orb-gradient: radial-gradient(circle, #d8b4fe 0%, #a855f7 35%, #581c87 75%, #0b080f 100%);
+    --shadow-color: rgba(0, 0, 0, 0.5);
+    --upload-hover-bg: rgba(168, 85, 247, 0.08);
+    --chip-hover: rgba(168, 85, 247, 0.2);
+    --sidebar-width: 280px;
+    --header-height: 64px;
+    --transition-speed: 0.25s;
+  }
+
+  [data-theme="light"] {
+    --bg-main: #fcfbfe;
+    --bg-gradient: radial-gradient(circle at 50% 25%, #f3ebfc 0%, #fcfbfe 75%);
+    --bg-sidebar: #f5f2fa;
+    --border-color: rgba(139, 92, 246, 0.18);
+    --border-muted: rgba(0, 0, 0, 0.06);
+    --text-primary: #1c1527;
+    --text-secondary: #5e5371;
+    --text-muted: #9b91ad;
+    --accent-purple: #8b5cf6;
+    --accent-glow: rgba(139, 92, 246, 0.2);
+    --glass-bg: rgba(255, 255, 255, 0.75);
+    --glass-border: rgba(139, 92, 246, 0.2);
+    --card-bg: #ffffff;
+    --input-bg: rgba(255, 255, 255, 0.85);
+    --button-hover: rgba(139, 92, 246, 0.08);
+    --bubble-user: rgba(139, 92, 246, 0.08);
+    --bubble-user-border: rgba(139, 92, 246, 0.25);
+    --bubble-bot: rgba(255, 255, 255, 0.8);
+    --bubble-bot-border: rgba(139, 92, 246, 0.12);
+    --orb-gradient: radial-gradient(circle, #f3e8ff 0%, #c084fc 35%, #8b5cf6 75%, #fcfbfe 100%);
+    --shadow-color: rgba(139, 92, 246, 0.05);
+    --upload-hover-bg: rgba(139, 92, 246, 0.05);
+    --chip-hover: rgba(139, 92, 246, 0.15);
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  }
 
   body {
-    font-family: 'Segoe UI', system-ui, sans-serif;
-    background: #1e1e1e;
-    color: #d4d4d4;
+    background: var(--bg-main);
+    background-image: var(--bg-gradient);
+    color: var(--text-primary);
     height: 100vh;
     display: flex;
-    flex-direction: column;
+    overflow: hidden;
+    transition: background var(--transition-speed) ease, color var(--transition-speed) ease;
   }
 
-  /* ── header ── */
-  header {
-    background: #252526;
-    border-bottom: 1px solid #3e3e42;
-    padding: 12px 24px;
+  /* ── Sidebar ── */
+  aside.sidebar {
+    width: var(--sidebar-width);
+    background: var(--bg-sidebar);
+    border-right: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    gap: 20px;
+    z-index: 100;
+    transition: background var(--transition-speed) ease, border-color var(--transition-speed) ease;
+  }
+
+  .sidebar-header {
     display: flex;
     align-items: center;
-    gap: 12px;
-  }
-  header h1 {
-    font-size: 16px;
-    font-weight: 600;
-    color: #ffffff;
-  }
-  header span {
-    font-size: 12px;
-    color: #858585;
-  }
-  .badge {
-    background: #0e639c;
-    color: #ffffff;
-    font-size: 11px;
-    padding: 2px 8px;
-    border-radius: 10px;
-    font-weight: 500;
+    justify-content: space-between;
   }
 
-  /* ── layout ── */
-  .layout {
+  .brand {
     display: flex;
-    flex: 1;
-    overflow: hidden;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: var(--text-primary);
   }
 
-  /* ── sidebar ── */
-  .sidebar {
-    width: 280px;
-    background: #252526;
-    border-right: 1px solid #3e3e42;
+  .brand-logo {
+    width: 28px;
+    height: 28px;
+    background: linear-gradient(135deg, var(--accent-purple), #6366f1);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: 800;
+    font-size: 14px;
+    box-shadow: 0 4px 12px var(--accent-glow);
+  }
+
+  .brand-name {
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    background: linear-gradient(to right, var(--text-primary), var(--text-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .sidebar-toggle-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+
+  .sidebar-toggle-btn:hover {
+    color: var(--text-primary);
+    background: var(--button-hover);
+  }
+
+  /* New Upload button matching Zyricon New Chat */
+  .btn-upload {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    color: var(--text-primary);
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+    width: 100%;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px var(--shadow-color);
+  }
+
+  .btn-upload:hover {
+    background: linear-gradient(135deg, var(--accent-purple), #6366f1);
+    color: #fff;
+    border-color: transparent;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px var(--accent-glow);
+  }
+
+  .btn-upload svg {
+    flex-shrink: 0;
+  }
+
+  .sidebar-nav {
     display: flex;
     flex-direction: column;
-    padding: 16px;
-    gap: 16px;
+    gap: 20px;
+    flex: 1;
+    overflow-y: auto;
   }
 
-  .sidebar h2 {
+  .nav-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .nav-section h3 {
     font-size: 11px;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: #858585;
-    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    font-weight: 700;
+    margin-bottom: 4px;
+    padding-left: 6px;
   }
 
-  /* ── upload zone ── */
-  .upload-zone {
-    border: 1.5px dashed #3e3e42;
-    border-radius: 8px;
-    padding: 20px 12px;
-    text-align: center;
-    cursor: pointer;
-    transition: border-color 0.2s, background 0.2s;
-  }
-  .upload-zone:hover, .upload-zone.drag-over {
-    border-color: #0e639c;
-    background: #0e639c18;
-  }
-  .upload-zone .icon {
-    font-size: 28px;
-    margin-bottom: 8px;
-  }
-  .upload-zone p {
-    font-size: 12px;
-    color: #858585;
-    line-height: 1.5;
-  }
-  .upload-zone p strong {
-    color: #4fc1ff;
-  }
-  #file-input { display: none; }
-
-  /* ── document list ── */
   .doc-list {
     display: flex;
     flex-direction: column;
     gap: 6px;
-    flex: 1;
+    max-height: 260px;
     overflow-y: auto;
+    padding-right: 2px;
   }
 
   .doc-item {
-    background: #2d2d2d;
-    border: 1px solid #3e3e42;
-    border-radius: 6px;
-    padding: 8px 10px;
+    background: var(--glass-bg);
+    border: 1px solid var(--border-muted);
+    border-radius: 10px;
+    padding: 10px 12px;
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-size: 12px;
+    gap: 10px;
+    font-size: 13px;
+    transition: all 0.2s ease;
+    cursor: pointer;
   }
-  .doc-item .doc-icon { color: #4fc1ff; }
-  .doc-item .doc-name {
+
+  .doc-item:hover {
+    border-color: var(--accent-purple);
+    background: var(--upload-hover-bg);
+    transform: translateX(2px);
+  }
+
+  .doc-icon-wrapper {
+    color: var(--accent-purple);
+    display: flex;
+    align-items: center;
+  }
+
+  .doc-info {
+    display: flex;
+    flex-direction: column;
     flex: 1;
-    color: #d4d4d4;
+    overflow: hidden;
+  }
+
+  .doc-name {
+    color: var(--text-primary);
+    font-weight: 500;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-  .doc-item .doc-chunks {
-    color: #858585;
+
+  .doc-meta {
+    color: var(--text-muted);
     font-size: 11px;
-    white-space: nowrap;
+    margin-top: 2px;
   }
 
-  /* ── reset button ── */
-  .btn-reset {
-    background: none;
-    border: 1px solid #3e3e42;
-    color: #858585;
-    border-radius: 6px;
-    padding: 7px 12px;
+  .doc-empty-state {
     font-size: 12px;
+    color: var(--text-muted);
+    padding: 12px 6px;
+    text-align: center;
+    border: 1px dashed var(--border-muted);
+    border-radius: 8px;
+  }
+
+  /* Upgrade Box matching Template Bottom Box */
+  .premium-box {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    box-shadow: 0 8px 24px var(--shadow-color);
+  }
+
+  .premium-icon {
+    width: 28px;
+    height: 28px;
+    background: rgba(168, 85, 247, 0.1);
+    color: var(--accent-purple);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+  }
+
+  .premium-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .premium-desc {
+    font-size: 11px;
+    color: var(--text-secondary);
+    line-height: 1.4;
+  }
+
+  .btn-reset {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--accent-purple);
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-size: 12px;
+    font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
     width: 100%;
   }
+
   .btn-reset:hover {
+    background: rgba(244, 71, 71, 0.1);
     border-color: #f44747;
     color: #f44747;
   }
 
-  /* ── chat area ── */
-  .chat-area {
+  /* ── Main Chat Area ── */
+  main.chat-area {
     flex: 1;
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    position: relative;
   }
 
-  .messages {
+  /* Chat Header */
+  .chat-header {
+    height: var(--header-height);
+    border-bottom: 1px solid var(--border-color);
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    z-index: 50;
+    transition: border-color var(--transition-speed) ease;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  /* Dropdown pill */
+  .model-selector {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    color: var(--text-primary);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .model-selector:hover {
+    border-color: var(--accent-purple);
+    background: var(--button-hover);
+  }
+
+  .model-chevron {
+    width: 12px;
+    height: 12px;
+    color: var(--text-muted);
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .status-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-secondary);
+  }
+
+  .status-dot {
+    width: 6px;
+    height: 6px;
+    background-color: #f59e0b; /* yellow for empty */
+    border-radius: 50%;
+  }
+
+  .status-dot.active {
+    background-color: #10b981; /* green for loaded */
+    box-shadow: 0 0 8px #10b981;
+  }
+
+  .header-btn {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    color: var(--text-secondary);
+    padding: 8px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+  }
+
+  .header-btn:hover {
+    border-color: var(--accent-purple);
+    color: var(--text-primary);
+    background: var(--button-hover);
+  }
+
+  /* Chat Contents */
+  .chat-content-container {
     flex: 1;
     overflow-y: auto;
-    padding: 24px;
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    position: relative;
   }
 
-  /* ── message bubbles ── */
-  .message {
+  /* Welcome Container */
+  .welcome-container {
     display: flex;
-    gap: 12px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    padding: 40px 24px 160px 24px;
+    text-align: center;
     max-width: 820px;
+    margin: 0 auto;
+    width: 100%;
   }
-  .message.user { flex-direction: row-reverse; align-self: flex-end; }
 
-  .avatar {
+  .glowing-orb-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 24px;
+    position: relative;
+  }
+
+  .glowing-orb {
+    width: 76px;
+    height: 76px;
+    border-radius: 50%;
+    background: var(--orb-gradient);
+    box-shadow: 0 0 35px var(--accent-glow), inset 0 0 12px rgba(255, 255, 255, 0.4);
+    animation: float 4s ease-in-out infinite alternate, pulse-glow 3s ease-in-out infinite;
+    position: relative;
+  }
+
+  .glowing-orb::after {
+    content: '';
+    position: absolute;
+    top: -10%; left: -10%; right: -10%; bottom: -10%;
+    border-radius: 50%;
+    background: var(--orb-gradient);
+    filter: blur(14px);
+    opacity: 0.4;
+    z-index: -1;
+    animation: rotate-aura 12s linear infinite;
+  }
+
+  @keyframes float {
+    0% { transform: translateY(0px); }
+    100% { transform: translateY(-8px); }
+  }
+
+  @keyframes pulse-glow {
+    0% { box-shadow: 0 0 25px var(--accent-glow), inset 0 0 8px rgba(255, 255, 255, 0.3); }
+    50% { box-shadow: 0 0 45px var(--accent-glow), inset 0 0 16px rgba(255, 255, 255, 0.5); }
+    100% { box-shadow: 0 0 25px var(--accent-glow), inset 0 0 8px rgba(255, 255, 255, 0.3); }
+  }
+
+  @keyframes rotate-aura {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  .welcome-title {
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    background: linear-gradient(135deg, var(--text-primary) 30%, var(--accent-purple) 90%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 12px;
+  }
+
+  .welcome-subtitle {
+    font-size: 15px;
+    color: var(--text-secondary);
+    max-width: 500px;
+    line-height: 1.5;
+    margin-bottom: 32px;
+  }
+
+  /* Suggestion Chips */
+  .suggestion-chips {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    width: 100%;
+  }
+
+  .chip-btn {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    color: var(--text-secondary);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 4px 12px var(--shadow-color);
+  }
+
+  .chip-btn:hover {
+    background: var(--accent-purple);
+    color: #ffffff;
+    border-color: var(--accent-purple);
+    transform: translateY(-1.5px);
+    box-shadow: 0 6px 18px var(--accent-glow);
+  }
+
+  /* Feature cards grid at welcome bottom */
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    width: 100%;
+    margin-top: 24px;
+  }
+
+  .feature-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    padding: 20px;
+    border-radius: 16px;
+    backdrop-filter: blur(8px);
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    gap: 10px;
+    box-shadow: 0 4px 16px var(--shadow-color);
+  }
+
+  .feature-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--accent-purple);
+    box-shadow: 0 8px 24px var(--accent-glow);
+  }
+
+  .feature-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
+
+  .feature-icon-box {
+    background: rgba(168, 85, 247, 0.1);
+    color: var(--accent-purple);
     width: 32px;
     height: 32px;
-    border-radius: 6px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .feature-pill {
+    font-size: 10px;
+    padding: 3px 8px;
+    background: rgba(168, 85, 247, 0.08);
+    border: 1px solid var(--border-color);
+    color: var(--accent-purple);
+    border-radius: 12px;
+    font-weight: 700;
+  }
+
+  .feature-card h4 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+
+  .feature-card p {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+
+  /* ── Message Log ── */
+  .messages {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    padding: 30px 24px 160px 24px;
+    max-width: 820px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .message-row {
+    display: flex;
+    gap: 14px;
+    width: 100%;
+    animation: fadeInUp 0.3s ease forwards;
+  }
+
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .message-row.user {
+    flex-direction: row-reverse;
+  }
+
+  .avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 14px;
     flex-shrink: 0;
+    box-shadow: 0 4px 12px var(--shadow-color);
   }
-  .avatar.bot { background: #0e639c; }
-  .avatar.user-av { background: #6b3fa0; }
+
+  .avatar.bot-av {
+    background: linear-gradient(135deg, var(--accent-purple), #6366f1);
+    color: #ffffff;
+  }
+
+  .avatar.user-av {
+    background: linear-gradient(135deg, #14b8a6, #0e7490);
+    color: #ffffff;
+  }
 
   .bubble {
-    background: #2d2d2d;
-    border: 1px solid #3e3e42;
-    border-radius: 8px;
-    padding: 12px 16px;
+    background: var(--bubble-bot);
+    border: 1px solid var(--bubble-bot-border);
+    color: var(--text-primary);
+    border-radius: 16px;
+    padding: 14px 18px;
     font-size: 14px;
     line-height: 1.6;
-    max-width: 680px;
-  }
-  .message.user .bubble {
-    background: #0e3a5e;
-    border-color: #0e639c;
-    color: #d4d4d4;
+    max-width: 75%;
+    box-shadow: 0 4px 12px var(--shadow-color);
+    position: relative;
+    backdrop-filter: blur(6px);
   }
 
-  /* ── sources ── */
-  .sources {
-    margin-top: 10px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
+  .message-row.user .bubble {
+    background: var(--bubble-user);
+    border-color: var(--bubble-user-border);
+    max-width: 75%;
   }
-  .sources-label {
+
+  /* Confidence label inside bubble */
+  .confidence-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
     font-size: 11px;
-    color: #858585;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    margin-bottom: 2px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 12px;
+    margin-top: 10px;
   }
+
+  .conf-high {
+    background: rgba(16, 185, 129, 0.08);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+  }
+
+  .conf-medium {
+    background: rgba(245, 158, 11, 0.08);
+    color: #f59e0b;
+    border: 1px solid rgba(245, 158, 11, 0.2);
+  }
+
+  .conf-low {
+    background: rgba(239, 68, 68, 0.08);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+  }
+
+  /* Sources details inside bot message */
+  .sources-box {
+    margin-top: 14px;
+    border-top: 1px solid var(--border-muted);
+    padding-top: 12px;
+  }
+
+  .sources-heading {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 8px;
+  }
+
+  .sources-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
   .source-chip {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    background: #1e1e1e;
-    border: 1px solid #3e3e42;
-    border-radius: 4px;
-    padding: 4px 8px;
+    background: var(--glass-bg);
+    border: 1px solid var(--border-muted);
+    padding: 6px 10px;
+    border-radius: 8px;
     font-size: 11px;
-    color: #858585;
+    color: var(--text-secondary);
+    transition: all 0.2s;
   }
-  .source-chip .source-name { color: #4fc1ff; }
 
-  /* ── confidence badges ── */
-  .conf-high   { color: #4ec9b0; }
-  .conf-medium { color: #dcdcaa; }
-  .conf-low    { color: #f44747; }
+  .source-chip:hover {
+    border-color: var(--accent-purple);
+    color: var(--text-primary);
+  }
 
-  /* ── input bar ── */
-  .input-bar {
-    background: #252526;
-    border-top: 1px solid #3e3e42;
-    padding: 16px 24px;
+  .source-chip-name {
+    color: var(--accent-purple);
+    font-weight: 600;
+  }
+
+  .source-chip-match {
+    color: var(--text-muted);
+  }
+
+  /* ── Interactive Input Area ── */
+  .input-area {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: linear-gradient(to top, var(--bg-main) 70%, transparent 100%);
+    padding: 24px 20px 24px 20px;
+    z-index: 10;
+  }
+
+  .input-container-inner {
+    max-width: 820px;
+    margin: 0 auto;
     display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .input-box-wrapper {
+    background: var(--input-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 18px;
+    padding: 12px 16px;
+    backdrop-filter: blur(16px);
+    box-shadow: 0 8px 32px var(--shadow-color);
+    transition: border-color 0.25s, box-shadow 0.25s;
+    display: flex;
+    flex-direction: column;
     gap: 10px;
-    align-items: flex-end;
+  }
+
+  .input-box-wrapper:focus-within {
+    border-color: var(--accent-purple);
+    box-shadow: 0 8px 32px var(--accent-glow);
+  }
+
+  .input-main-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .input-icon {
+    color: var(--accent-purple);
+    display: flex;
+    align-items: center;
+    margin-top: 4px;
+    opacity: 0.85;
   }
 
   #question-input {
     flex: 1;
-    background: #3c3c3c;
-    border: 1px solid #3e3e42;
-    border-radius: 8px;
-    color: #d4d4d4;
-    font-size: 14px;
-    padding: 10px 14px;
-    resize: none;
-    outline: none;
-    font-family: inherit;
-    line-height: 1.5;
-    max-height: 120px;
-    transition: border-color 0.2s;
-  }
-  #question-input:focus { border-color: #0e639c; }
-  #question-input::placeholder { color: #555; }
-  #question-input:disabled { opacity: 0.5; cursor: not-allowed; }
-
-  .btn-send {
-    background: #0e639c;
+    background: transparent;
     border: none;
-    border-radius: 8px;
-    color: #ffffff;
-    padding: 10px 18px;
+    outline: none;
+    color: var(--text-primary);
     font-size: 14px;
-    cursor: pointer;
-    transition: background 0.2s;
-    white-space: nowrap;
-    height: 40px;
+    line-height: 1.5;
+    resize: none;
+    max-height: 120px;
+    min-height: 24px;
+    font-family: inherit;
   }
-  .btn-send:hover:not(:disabled) { background: #1177bb; }
-  .btn-send:disabled { opacity: 0.4; cursor: not-allowed; }
 
-  /* ── typing indicator ── */
+  #question-input::placeholder {
+    color: var(--text-muted);
+  }
+
+  #question-input:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .input-actions-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid var(--border-muted);
+    padding-top: 10px;
+  }
+
+  .left-actions, .right-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .input-action-btn {
+    background: transparent;
+    border: 1px solid var(--border-muted);
+    color: var(--text-secondary);
+    padding: 6px 12px;
+    border-radius: 14px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+  }
+
+  .input-action-btn:hover:not(:disabled) {
+    background: var(--button-hover);
+    color: var(--accent-purple);
+    border-color: var(--accent-purple);
+  }
+
+  .input-action-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .circle-action-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--glass-bg);
+    border: 1px solid var(--border-muted);
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .circle-action-btn:hover:not(:disabled) {
+    background: var(--button-hover);
+    color: var(--accent-purple);
+    border-color: var(--accent-purple);
+  }
+
+  .circle-action-btn.send-btn-active {
+    background: var(--accent-purple);
+    color: #ffffff;
+    border: none;
+    box-shadow: 0 4px 12px var(--accent-glow);
+  }
+
+  .circle-action-btn.send-btn-active:hover:not(:disabled) {
+    background: #9333ea;
+    transform: scale(1.05);
+  }
+
+  .circle-action-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+  }
+
+  /* ── Drag & Drop Fullscreen Overlay ── */
+  .drag-drop-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(11, 8, 15, 0.85);
+    backdrop-filter: blur(12px);
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+
+  .drag-drop-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .overlay-card {
+    background: var(--card-bg);
+    border: 2px dashed var(--accent-purple);
+    padding: 40px;
+    border-radius: 24px;
+    text-align: center;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    transform: scale(0.95);
+    transition: transform 0.25s ease;
+  }
+
+  .drag-drop-overlay.active .overlay-card {
+    transform: scale(1);
+  }
+
+  .overlay-icon {
+    width: 60px;
+    height: 60px;
+    background: rgba(168, 85, 247, 0.1);
+    color: var(--accent-purple);
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+  }
+
+  .overlay-card h3 {
+    font-size: 20px;
+    font-weight: 700;
+  }
+
+  .overlay-card p {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+
+  /* ── Upload Floating Progress ── */
+  .upload-status-indicator {
+    position: absolute;
+    top: 80px;
+    right: 24px;
+    background: var(--glass-bg);
+    border: 1px solid var(--accent-purple);
+    color: var(--text-primary);
+    padding: 10px 16px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 500;
+    z-index: 1000;
+    box-shadow: 0 8px 24px var(--shadow-color);
+    backdrop-filter: blur(16px);
+    display: none;
+    align-items: center;
+    gap: 8px;
+    animation: slideInRight 0.3s ease;
+  }
+
+  @keyframes slideInRight {
+    from { transform: translateX(50px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+
+  .loader-spinner {
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-top: 2px solid var(--accent-purple);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  /* ── Typing Indicator ── */
   .typing {
     display: flex;
-    gap: 4px;
-    padding: 4px 0;
+    gap: 5px;
+    align-items: center;
+    padding: 6px 0;
   }
+
   .typing span {
-    width: 6px; height: 6px;
-    background: #858585;
+    width: 6px;
+    height: 6px;
+    background: var(--text-secondary);
     border-radius: 50%;
-    animation: bounce 1.2s infinite;
+    animation: bounce 1.4s infinite;
   }
+
   .typing span:nth-child(2) { animation-delay: 0.2s; }
   .typing span:nth-child(3) { animation-delay: 0.4s; }
+
   @keyframes bounce {
     0%, 80%, 100% { transform: translateY(0); }
-    40% { transform: translateY(-6px); }
+    40% { transform: translateY(-5px); }
   }
 
-  /* ── upload progress ── */
-  .upload-progress {
-    font-size: 12px;
-    color: #4fc1ff;
-    text-align: center;
-    padding: 4px 0;
-    min-height: 18px;
+  /* ── Custom Scrollbar ── */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
   }
-
-  /* ── scrollbar ── */
-  ::-webkit-scrollbar { width: 6px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: #3e3e42; border-radius: 3px; }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--border-muted);
+    border-radius: 10px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
+  }
 </style>
 </head>
 <body>
 
-<header>
-  <div class="avatar bot">⚡</div>
-  <h1>RAG Citation Engine</h1>
-  <span>document-grounded Q&amp;A</span>
-  <div class="badge">v1.0</div>
-</header>
-
-<div class="layout">
-
-  <!-- sidebar -->
+  <!-- Sidebar -->
   <aside class="sidebar">
-    <h2>Documents</h2>
-
-    <div class="upload-zone" id="upload-zone">
-      <div class="icon">📄</div>
-      <p>Drop files here or<br>
-        <strong>click to upload</strong><br>
-        <span>.md &nbsp;.txt &nbsp;.pdf</span>
-      </p>
-      <input type="file" id="file-input"
-             accept=".md,.txt,.pdf" multiple>
+    <div class="sidebar-header">
+      <a href="#" class="brand">
+        <div class="brand-logo">Z</div>
+        <span class="brand-name">Zyricon RAG</span>
+      </a>
+      <button class="sidebar-toggle-btn" title="Toggle Sidebar">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>
+      </button>
     </div>
 
-    <div class="upload-progress" id="upload-progress"></div>
-
-    <div class="doc-list" id="doc-list"></div>
-
-    <button class="btn-reset" id="btn-reset">
-      🗑 Clear all documents
+    <!-- Upload Trigger mimicking New Chat button -->
+    <button class="btn-upload" id="btn-upload-trigger">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+      Upload Document
     </button>
-  </aside>
+    <input type="file" id="file-input" accept=".md,.txt,.pdf" multiple style="display: none;">
 
-  <!-- chat -->
-  <main class="chat-area">
-    <div class="messages" id="messages">
-      <div class="message">
-        <div class="avatar bot">⚡</div>
-        <div class="bubble">
-          Hello! Upload a document on the left to get started.
-          I'll answer questions about it with citations showing
-          exactly where each answer came from.
+    <div class="sidebar-nav">
+      <div class="nav-section">
+        <h3>Indexed Documents</h3>
+        <div class="doc-list" id="doc-list">
+          <div class="doc-empty-state">No documents uploaded yet</div>
         </div>
       </div>
     </div>
 
-    <div class="input-bar">
-      <textarea
-        id="question-input"
-        rows="1"
-        placeholder="Upload a document first, then ask a question..."
-        disabled
-      ></textarea>
-      <button class="btn-send" id="btn-send" disabled>Send</button>
+    <!-- Bottom card mimicking Premium Box -->
+    <div class="premium-box">
+      <div class="premium-icon">⚡</div>
+      <div class="premium-title">RAG Engine Active</div>
+      <div class="premium-desc">Indexed document passages are reranked using Cohere to feed context-grounded citations to the generation engine.</div>
+      <button class="btn-reset" id="btn-reset">
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+        Reset Database
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Chat Area -->
+  <main class="chat-area">
+    <!-- Chat Header -->
+    <header class="chat-header">
+      <div class="header-left">
+        <div class="header-title" style="font-size: 14px; font-weight: 600; color: var(--text-secondary);">RAG Citation Engine</div>
+      </div>
+
+      <div class="header-right">
+        <!-- Connection State -->
+        <div class="status-badge">
+          <span class="status-dot" id="status-dot"></span>
+          <span id="status-text">0 chunks</span>
+        </div>
+
+        <!-- Clear Chat button -->
+        <button class="header-btn" id="clear-chat-btn" title="Clear Chat Logs">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+          Clear Chat
+        </button>
+
+        <!-- Theme Toggle button -->
+        <button class="circle-action-btn" id="theme-toggle" title="Toggle Theme">
+          <!-- Populated by JS -->
+        </button>
+      </div>
+    </header>
+
+    <!-- Chat Content -->
+    <div class="chat-content-container">
+      
+      <!-- Welcome Screen (Initial empty state) -->
+      <div class="welcome-container" id="welcome-container">
+        <div class="glowing-orb-wrapper">
+          <div class="glowing-orb"></div>
+        </div>
+        
+        <h2 class="welcome-title">Ready to Cite Your Sources?</h2>
+        <p class="welcome-subtitle">Ask questions about your files. The engine retrieves context paragraphs, reranks them, and builds cited answers.</p>
+
+        <!-- Suggestions above input box -->
+        <div class="suggestion-chips" id="suggestion-chips">
+          <button class="chip-btn" data-query="How many weeks of parental leave do we get?">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .1 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"></path><line x1="9" y1="18" x2="15" y2="18"></line></svg>
+            Parental Leave Policy
+          </button>
+          <button class="chip-btn" data-query="Tell me about the Northwind Robotics Wiki guidelines.">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+            Wiki Guidelines
+          </button>
+          <button class="chip-btn" data-query="What is the confidence threshold configured for search?">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+            Search Confidence
+          </button>
+        </div>
+
+        <!-- Features grid at bottom of welcome -->
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-card-header">
+              <div class="feature-icon-box">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+              </div>
+              <span class="feature-pill">Hybrid Search</span>
+            </div>
+            <h4>Keyword & Vector</h4>
+            <p>Runs dual-stage queries leveraging local BM25 indexing and dense cosine vector embeddings for total retrieval accuracy.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-card-header">
+              <div class="feature-icon-box">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+              </div>
+              <span class="feature-pill">Reranking</span>
+            </div>
+            <h4>Cohere Rerank</h4>
+            <p>Dynamically scores retrieved contexts via Cohere's rerank engine, ensuring only raw relevance is supplied to generation.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-card-header">
+              <div class="feature-icon-box">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+              </div>
+              <span class="feature-pill">Gen Engine</span>
+            </div>
+            <h4>Response Generation</h4>
+            <p>Formulates complete document-restricted answers and adds specific source file name citations to every single claim.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chat Messages (Visible when populated) -->
+      <div class="messages" id="messages" style="display: none;"></div>
+
+    </div>
+
+    <!-- Interactive Input Box anchored at bottom -->
+    <div class="input-area">
+      <div class="input-container-inner">
+        <div class="input-box-wrapper">
+          <div class="input-main-row">
+            <div class="input-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+            </div>
+            <textarea id="question-input" rows="1" placeholder="Upload a document first, then ask a question..." disabled></textarea>
+          </div>
+          
+          <div class="input-actions-row">
+            <div class="left-actions">
+              <!-- Attach button triggers hidden file input -->
+              <button class="input-action-btn" id="attach-btn" title="Upload Document">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+                Attach
+              </button>
+            </div>
+
+            <div class="right-actions">
+              <button class="circle-action-btn" id="scroll-bottom-btn" title="Scroll to Bottom" style="display: none;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+              </button>
+              <button class="circle-action-btn" id="btn-send" disabled title="Send Question">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </main>
 
-</div>
+  <!-- Fullscreen drag drop zone -->
+  <div class="drag-drop-overlay" id="drag-drop-overlay">
+    <div class="overlay-card">
+      <div class="overlay-icon">📤</div>
+      <h3>Add Documents to Vector DB</h3>
+      <p>Drop your markdown (.md), plain text (.txt), or PDF (.pdf) files here to extract chunks and index them immediately.</p>
+    </div>
+  </div>
+
+  <!-- Float status notification indicator -->
+  <div class="upload-status-indicator" id="upload-status-indicator">
+    <div class="loader-spinner"></div>
+    <span id="upload-status-message">Uploading file...</span>
+  </div>
 
 <script>
 const api = async (path, opts={}) => {
@@ -379,92 +1271,220 @@ const api = async (path, opts={}) => {
   return res.json()
 }
 
-// ── state ──────────────────────────────────────────────────
+// ── State ──────────────────────────────────────────────────
 let uploadedDocs = []
 
-// ── elements ───────────────────────────────────────────────
-const uploadZone    = document.getElementById('upload-zone')
-const fileInput     = document.getElementById('file-input')
-const uploadProg    = document.getElementById('upload-progress')
-const docList       = document.getElementById('doc-list')
-const messages      = document.getElementById('messages')
-const questionInput = document.getElementById('question-input')
-const btnSend       = document.getElementById('btn-send')
-const btnReset      = document.getElementById('btn-reset')
+// ── Elements ───────────────────────────────────────────────
+const fileInput          = document.getElementById('file-input')
+const btnUploadTrigger   = document.getElementById('btn-upload-trigger')
+const attachBtn          = document.getElementById('attach-btn')
+const docList            = document.getElementById('doc-list')
+const messages           = document.getElementById('messages')
+const welcomeContainer   = document.getElementById('welcome-container')
+const questionInput      = document.getElementById('question-input')
+const btnSend            = document.getElementById('btn-send')
+const btnReset           = document.getElementById('btn-reset')
+const clearChatBtn       = document.getElementById('clear-chat-btn')
+const themeToggle        = document.getElementById('theme-toggle')
+const statusDot          = document.getElementById('status-dot')
+const statusText         = document.getElementById('status-text')
+const dragDropOverlay    = document.getElementById('drag-drop-overlay')
+const uploadIndicator    = document.getElementById('upload-status-indicator')
+const uploadIndicatorMsg = document.getElementById('upload-status-message')
+const suggestionChips    = document.getElementById('suggestion-chips')
+const scrollBottomBtn    = document.getElementById('scroll-bottom-btn')
+const chatContentContainer = document.querySelector('.chat-content-container')
 
-// ── upload zone interactions ────────────────────────────────
-uploadZone.addEventListener('click', () => fileInput.click())
+// ── Theme Management ───────────────────────────────────────
+const currentTheme = localStorage.getItem('theme') || 'dark'
+document.documentElement.setAttribute('data-theme', currentTheme)
+updateThemeToggleIcon(currentTheme)
 
-uploadZone.addEventListener('dragover', e => {
-  e.preventDefault()
-  uploadZone.classList.add('drag-over')
+themeToggle.addEventListener('click', () => {
+  const newTheme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'
+  document.documentElement.setAttribute('data-theme', newTheme)
+  localStorage.setItem('theme', newTheme)
+  updateThemeToggleIcon(newTheme)
 })
-uploadZone.addEventListener('dragleave', () => {
-  uploadZone.classList.remove('drag-over')
-})
-uploadZone.addEventListener('drop', e => {
-  e.preventDefault()
-  uploadZone.classList.remove('drag-over')
-  handleFiles(e.dataTransfer.files)
-})
+
+function updateThemeToggleIcon(theme) {
+  themeToggle.innerHTML = theme === 'dark'
+    ? `<svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.07" x2="5.64" y2="17.66"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`
+    : `<svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`
+}
+
+// ── Upload Event Handlers ──────────────────────────────────
+btnUploadTrigger.addEventListener('click', () => fileInput.click())
+attachBtn.addEventListener('click', () => fileInput.click())
 
 fileInput.addEventListener('change', () => {
   handleFiles(fileInput.files)
   fileInput.value = ''
 })
 
+// Full-screen Drag and Drop
+let dragCounter = 0
+window.addEventListener('dragenter', e => {
+  e.preventDefault()
+  dragCounter++
+  if (e.dataTransfer.types.includes('Files')) {
+    dragDropOverlay.classList.add('active')
+  }
+})
+window.addEventListener('dragleave', e => {
+  e.preventDefault()
+  dragCounter--
+  if (dragCounter === 0) {
+    dragDropOverlay.classList.remove('active')
+  }
+})
+window.addEventListener('dragover', e => e.preventDefault())
+window.addEventListener('drop', e => {
+  e.preventDefault()
+  dragCounter = 0
+  dragDropOverlay.classList.remove('active')
+  handleFiles(e.dataTransfer.files)
+})
+
 async function handleFiles(files) {
+  if (!files.length) return
+  
+  showUploadIndicator(`Uploading ${files.length} document(s)...`, true)
+  
+  let successCount = 0
+  let errorCount = 0
+  
   for (const file of files) {
-    uploadProg.textContent = `Uploading ${file.name}...`
+    showUploadIndicator(`Embedding & Indexing ${file.name}...`, true)
     try {
       const form = new FormData()
       form.append('file', file)
       const res = await api('/upload', { method: 'POST', body: form })
-      uploadedDocs.push({ name: file.name, chunks: res.chunks_added })
-      renderDocList()
-      enableChat()
-      uploadProg.textContent = `✓ ${file.name} — ${res.chunks_added} chunk(s)`
-      setTimeout(() => uploadProg.textContent = '', 3000)
+      
+      // Update local state, deduplicating file name if re-uploaded
+      const idx = uploadedDocs.findIndex(d => d.name === file.name)
+      if (idx !== -1) {
+        uploadedDocs[idx].chunks = res.chunks_added
+      } else {
+        uploadedDocs.push({ name: file.name, chunks: res.chunks_added })
+      }
+      
+      successCount++
     } catch(e) {
-      uploadProg.textContent = `✗ ${file.name}: ${e.message}`
-      setTimeout(() => uploadProg.textContent = '', 5000)
+      console.error(e)
+      errorCount++
+      showUploadIndicator(`✗ Failed to upload ${file.name}: ${e.message}`, false, 5000)
     }
+  }
+
+  // Reload status and update view
+  await updateStatus()
+  renderDocList()
+  
+  if (successCount > 0) {
+    showUploadIndicator(`✓ Successfully indexed ${successCount} document(s).`, false, 3000)
+  }
+}
+
+function showUploadIndicator(message, isSpinning = false, timeout = 0) {
+  uploadIndicator.style.display = 'flex'
+  uploadIndicatorMsg.textContent = message
+  
+  const spinner = uploadIndicator.querySelector('.loader-spinner')
+  if (isSpinning) {
+    spinner.style.display = 'block'
+  } else {
+    spinner.style.display = 'none'
+  }
+  
+  if (timeout > 0) {
+    setTimeout(() => {
+      uploadIndicator.style.display = 'none'
+    }, timeout)
   }
 }
 
 function renderDocList() {
+  if (uploadedDocs.length === 0) {
+    docList.innerHTML = `<div class="doc-empty-state">No documents uploaded yet</div>`
+    return
+  }
+  
   docList.innerHTML = uploadedDocs.map(d => `
-    <div class="doc-item">
-      <span class="doc-icon">📄</span>
-      <span class="doc-name" title="${d.name}">${d.name}</span>
-      <span class="doc-chunks">${d.chunks} chunks</span>
+    <div class="doc-item" title="${escHtml(d.name)}">
+      <div class="doc-icon-wrapper">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+      </div>
+      <div class="doc-info">
+        <span class="doc-name">${escHtml(d.name)}</span>
+        <span class="doc-meta">${d.chunks} chunks</span>
+      </div>
     </div>
   `).join('')
 }
 
+async function updateStatus() {
+  try {
+    const status = await api('/status')
+    if (status.ready) {
+      enableChat()
+      statusDot.classList.add('active')
+      statusText.textContent = `${status.total_chunks} chunks indexed`
+      if (status.files && status.files.length) {
+        uploadedDocs = status.files
+        renderDocList()
+      }
+    } else {
+      disableChat()
+      statusDot.classList.remove('active')
+      statusText.textContent = `0 chunks indexed`
+      uploadedDocs = []
+      renderDocList()
+    }
+  } catch(e) {
+    console.warn('Status check failed:', e)
+  }
+}
+
 function enableChat() {
   questionInput.disabled = false
-  questionInput.placeholder = 'Ask a question about your documents...'
+  questionInput.placeholder = 'Ask anything...'
   btnSend.disabled = false
+  btnSend.classList.add('send-btn-active')
 }
 
 function disableChat() {
   questionInput.disabled = true
   questionInput.placeholder = 'Upload a document first...'
   btnSend.disabled = true
+  btnSend.classList.remove('send-btn-active')
 }
 
-// ── reset ──────────────────────────────────────────────────
+// ── Reset Database ─────────────────────────────────────────
 btnReset.addEventListener('click', async () => {
-  if (!confirm('Clear all uploaded documents?')) return
-  await api('/reset', { method: 'DELETE' })
-  uploadedDocs = []
-  renderDocList()
-  disableChat()
-  addBotMessage('All documents cleared. Upload a new document to continue.')
+  if (!confirm('Are you sure you want to clear all uploaded documents and reset the vector database?')) return
+  
+  showUploadIndicator("Clearing all records from database...", true)
+  try {
+    await api('/reset', { method: 'DELETE' })
+    uploadedDocs = []
+    renderDocList()
+    disableChat()
+    
+    // Clear chat log as well
+    messages.innerHTML = ''
+    checkWelcomeState()
+    
+    statusDot.classList.remove('active')
+    statusText.textContent = `0 chunks indexed`
+    
+    showUploadIndicator("✓ Database successfully cleared.", false, 3000)
+  } catch(e) {
+    showUploadIndicator(`✗ Failed to clear database: ${e.message}`, false, 5000)
+  }
 })
 
-// ── chat ───────────────────────────────────────────────────
+// ── Chat Functionality ─────────────────────────────────────
 btnSend.addEventListener('click', sendMessage)
 questionInput.addEventListener('keydown', e => {
   if (e.key === 'Enter' && !e.shiftKey) {
@@ -473,20 +1493,50 @@ questionInput.addEventListener('keydown', e => {
   }
 })
 
-// auto-resize textarea
+// Auto-resize textarea
 questionInput.addEventListener('input', () => {
   questionInput.style.height = 'auto'
-  questionInput.style.height = questionInput.scrollHeight + 'px'
+  questionInput.style.height = Math.min(questionInput.scrollHeight, 120) + 'px'
+})
+
+// Suggestion chips
+suggestionChips.addEventListener('click', e => {
+  const btn = e.target.closest('.chip-btn')
+  if (btn) {
+    const query = btn.getAttribute('data-query')
+    if (query) {
+      // If chat input is disabled, show warning to upload file
+      if (questionInput.disabled) {
+        showUploadIndicator("⚠️ Please upload a document first to activate the engine.", false, 3000)
+        return
+      }
+      questionInput.value = query
+      sendMessage()
+    }
+  }
+})
+
+// Clear Chat log only
+clearChatBtn.addEventListener('click', () => {
+  if (confirm('Clear chat history? (This does not delete your uploaded documents)')) {
+    messages.innerHTML = ''
+    checkWelcomeState()
+  }
 })
 
 async function sendMessage() {
   const question = questionInput.value.trim()
-  if (!question) return
+  if (!question || questionInput.disabled) return
 
   addUserMessage(question)
   questionInput.value = ''
   questionInput.style.height = 'auto'
+  
+  // Transition welcome state out
+  checkWelcomeState()
+
   btnSend.disabled = true
+  btnSend.classList.remove('send-btn-active')
 
   const typingId = addTypingIndicator()
 
@@ -500,17 +1550,29 @@ async function sendMessage() {
     addBotMessage(res.answer, res.sources, res.confidence)
   } catch(e) {
     removeTypingIndicator(typingId)
-    addBotMessage(`Error: ${e.message}`)
+    addBotMessage(`Error generating response: ${e.message}`)
   } finally {
     btnSend.disabled = false
+    btnSend.classList.add('send-btn-active')
     questionInput.focus()
   }
 }
 
-// ── message rendering ──────────────────────────────────────
+function checkWelcomeState() {
+  const hasMessages = messages.children.length > 0
+  if (hasMessages) {
+    welcomeContainer.style.display = 'none'
+    messages.style.display = 'flex'
+  } else {
+    welcomeContainer.style.display = 'flex'
+    messages.style.display = 'none'
+  }
+}
+
+// ── Message Rendering Helpers ──────────────────────────────
 function addUserMessage(text) {
   const div = document.createElement('div')
-  div.className = 'message user'
+  div.className = 'message-row user'
   div.innerHTML = `
     <div class="avatar user-av">👤</div>
     <div class="bubble">${escHtml(text)}</div>
@@ -524,26 +1586,28 @@ function addBotMessage(text, sources=[], confidence=null) {
     high: 'conf-high', medium: 'conf-medium', low: 'conf-low'
   }[confidence] || ''
 
-  const confLabel = confidence ? `
-    <span class="${confClass}" style="font-size:11px;margin-left:8px">
-      ● ${confidence} confidence
-    </span>` : ''
+  const confLabel = confidence && confidence !== 'none' ? `
+    <div class="confidence-tag ${confClass}">
+      ● ${confidence.toUpperCase()} CONFIDENCE
+    </div>` : ''
 
   const sourcesHtml = sources.length ? `
-    <div class="sources">
-      <div class="sources-label">Sources</div>
-      ${sources.map(s => `
-        <div class="source-chip">
-          📄 <span class="source-name">${escHtml(s.page_title)}</span>
-          <span>${(s.relevance_score * 100).toFixed(0)}% match</span>
-        </div>
-      `).join('')}
+    <div class="sources-box">
+      <div class="sources-heading">Source References</div>
+      <div class="sources-list">
+        ${sources.map(s => `
+          <div class="source-chip" title="File: ${escHtml(s.source_file)} (${(s.relevance_score * 100).toFixed(1)}% relevance)">
+            📄 <span class="source-chip-name">${escHtml(s.page_title)}</span>
+            <span class="source-chip-match">${(s.relevance_score * 100).toFixed(0)}% Match</span>
+          </div>
+        `).join('')}
+      </div>
     </div>` : ''
 
   const div = document.createElement('div')
-  div.className = 'message'
+  div.className = 'message-row'
   div.innerHTML = `
-    <div class="avatar bot">⚡</div>
+    <div class="avatar bot-av">⚡</div>
     <div class="bubble">
       <span>${escHtml(text)}</span>
       ${confLabel}
@@ -557,10 +1621,10 @@ function addBotMessage(text, sources=[], confidence=null) {
 function addTypingIndicator() {
   const id = 'typing-' + Date.now()
   const div = document.createElement('div')
-  div.className = 'message'
+  div.className = 'message-row'
   div.id = id
   div.innerHTML = `
-    <div class="avatar bot">⚡</div>
+    <div class="avatar bot-av">⚡</div>
     <div class="bubble">
       <div class="typing">
         <span></span><span></span><span></span>
@@ -576,8 +1640,34 @@ function removeTypingIndicator(id) {
   document.getElementById(id)?.remove()
 }
 
+// ── Scroll to Bottom Management ────────────────────────────
+chatContentContainer.addEventListener('scroll', () => {
+  const scrollPos = chatContentContainer.scrollTop
+  const scrollHeight = chatContentContainer.scrollHeight
+  const clientHeight = chatContentContainer.clientHeight
+  
+  // Show scroll button if scrolled up significantly
+  if (scrollHeight - scrollPos - clientHeight > 300) {
+    scrollBottomBtn.style.display = 'flex'
+  } else {
+    scrollBottomBtn.style.display = 'none'
+  }
+})
+
+scrollBottomBtn.addEventListener('click', () => {
+  chatContentContainer.scrollTo({
+    top: chatContentContainer.scrollHeight,
+    behavior: 'smooth'
+  })
+})
+
 function scrollToBottom() {
-  messages.scrollTop = messages.scrollHeight
+  setTimeout(() => {
+    chatContentContainer.scrollTo({
+      top: chatContentContainer.scrollHeight,
+      behavior: 'smooth'
+    })
+  }, 10)
 }
 
 function escHtml(str) {
@@ -588,15 +1678,24 @@ function escHtml(str) {
     .replace(/"/g, '&quot;')
 }
 
-// ── init: check if docs already uploaded ──────────────────
+// ── Init Check on Startup ──────────────────────────────────
 ;(async () => {
-  try {
-    const status = await api('/status')
-    if (status.ready) enableChat()
-  } catch(e) {
-    console.warn('Status check failed:', e)
-  }
+  await updateStatus()
+  checkWelcomeState()
 })()
+
+// ── Visual UI interactions (Sidebar toggle collapse) ───────
+const toggleSidebarBtn = document.querySelector('.sidebar-toggle-btn')
+const sidebarEl = document.querySelector('.sidebar')
+toggleSidebarBtn.addEventListener('click', () => {
+  if (sidebarEl.style.display === 'none') {
+    sidebarEl.style.display = 'flex'
+  } else {
+    sidebarEl.style.display = 'none'
+  }
+})
+
+// Event listeners for settings/options button removed because buttons were removed.
 </script>
 </body>
 </html>

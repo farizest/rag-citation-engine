@@ -70,9 +70,24 @@ async def root(request: Request):
 @app.get("/status")
 async def status():
     collection = get_collection()
+    count = collection.count()
+    files = []
+    if count > 0:
+        try:
+            data = collection.get(include=["metadatas"])
+            metadatas = data.get("metadatas", [])
+            file_map = {}
+            for meta in metadatas:
+                src = meta.get("source_file")
+                if src:
+                    file_map[src] = file_map.get(src, 0) + 1
+            files = [{"name": name, "chunks": chunks} for name, chunks in file_map.items()]
+        except Exception as e:
+            print("Error fetching collection metadata:", e)
     return {
-        "total_chunks": collection.count(),
-        "ready": collection.count() > 0,
+        "total_chunks": count,
+        "ready": count > 0,
+        "files": files,
     }
 
 
