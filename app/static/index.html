@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Zyricon RAG — Citation Engine</title>
+<title>ASK DOCS — A RAG Citation Engine</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -148,7 +148,7 @@
     background: var(--button-hover);
   }
 
-  /* New Upload button matching Zyricon New Chat */
+  /* New Upload button matching ASK DOCS style */
   .btn-upload {
     background: var(--glass-bg);
     border: 1px solid var(--glass-border);
@@ -1078,8 +1078,8 @@
   <aside class="sidebar">
     <div class="sidebar-header">
       <a href="#" class="brand">
-        <div class="brand-logo">Z</div>
-        <span class="brand-name">Zyricon RAG</span>
+        <div class="brand-logo">A</div>
+        <span class="brand-name">ASK DOCS</span>
       </a>
       <button class="sidebar-toggle-btn" title="Toggle Sidebar">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>
@@ -1119,7 +1119,7 @@
     <!-- Chat Header -->
     <header class="chat-header">
       <div class="header-left">
-        <div class="header-title" style="font-size: 14px; font-weight: 600; color: var(--text-secondary);">RAG Citation Engine</div>
+        <div class="header-title" style="font-size: 14px; font-weight: 600; color: var(--text-secondary);">ASK DOCS — A RAG Citation Engine</div>
       </div>
 
       <div class="header-right">
@@ -1155,20 +1155,7 @@
         <p class="welcome-subtitle">Ask questions about your files. The engine retrieves context paragraphs, reranks them, and builds cited answers.</p>
 
         <!-- Suggestions above input box -->
-        <div class="suggestion-chips" id="suggestion-chips">
-          <button class="chip-btn" data-query="How many weeks of parental leave do we get?">
-            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .1 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"></path><line x1="9" y1="18" x2="15" y2="18"></line></svg>
-            Parental Leave Policy
-          </button>
-          <button class="chip-btn" data-query="Tell me about the Northwind Robotics Wiki guidelines.">
-            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
-            Wiki Guidelines
-          </button>
-          <button class="chip-btn" data-query="What is the confidence threshold configured for search?">
-            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-            Search Confidence
-          </button>
-        </div>
+        <div class="suggestion-chips" id="suggestion-chips"></div>
 
         <!-- Features grid at bottom of welcome -->
         <div class="features-grid">
